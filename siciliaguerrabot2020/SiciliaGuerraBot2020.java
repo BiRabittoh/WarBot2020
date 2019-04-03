@@ -36,8 +36,8 @@ public class SiciliaGuerraBot2020 {
             verbose = Boolean.parseBoolean(args[1]);
             n_guerre = Integer.parseInt(args[2]);;
         } else {
-            soglia_popolazione = 9000;
-            verbose = false;
+            soglia_popolazione = 12000;
+            verbose = true;
             n_guerre = 500;
             System.out.println("Parametri errati o assenti. Carico i valori di default.");
         }
