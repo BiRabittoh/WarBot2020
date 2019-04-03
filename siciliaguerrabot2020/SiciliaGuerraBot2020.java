@@ -65,7 +65,7 @@ public class SiciliaGuerraBot2020 {
             for(Comune c : comuni){
                 System.out.println(c.getNome());
             }
-            System.out.println("\nLa guerra si è conclusa. L'intera regione è adesso unificata sotto il nome di " + combatteteSchiavi(comuni, verbose).getNome() + ".");
+            System.out.println("\nLa guerra si è conclusa. L'intera regione è adesso unificata sotto il regno di " + combatteteSchiavi(comuni, verbose).getNome() + ".");
         } else {
             //ANALIZZO LE PERCENTUALI DI VITTORIA
             
