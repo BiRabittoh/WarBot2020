@@ -18,6 +18,7 @@ public class Comune implements Comparable<Comune> {
     private Centroide pos;
     private LinkedList<Territorio> territori;
     private final int pop;
+    private double winrate;
 
     public Comune(String nome, int pop, Centroide pos) {
         this.nome = nome;

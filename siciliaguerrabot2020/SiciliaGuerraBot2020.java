@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  *
@@ -22,13 +23,27 @@ public class SiciliaGuerraBot2020 {
     /**
      * @param args the command line arguments
      */
+    
     public static void main(String[] args) {
         final String nomefile = "data.txt";
-        final int soglia_popolazione = 12000;
+        final int soglia_popolazione;
+        final boolean verbose;
+        final int n_guerre;
+        
+        //controllo se ci sono 3 argomenti
+        if(args.length == 3){
+            soglia_popolazione = Integer.parseInt(args[0]);
+            verbose = Boolean.parseBoolean(args[1]);
+            n_guerre = Integer.parseInt(args[2]);;
+        } else {
+            soglia_popolazione = 9000;
+            verbose = false;
+            n_guerre = 500;
+            System.out.println("Parametri errati o assenti. Carico i valori di default.");
+        }
         
         //LEGGO I DATI DA FILE
         ArrayList<Comune> comuni_unfiltered = new ArrayList<>();
-        Centroide temp;
         BufferedReader reader;
         StringTokenizer st;
         try {
@@ -40,69 +55,80 @@ public class SiciliaGuerraBot2020 {
                 line = reader.readLine();
             }
         } catch (IOException e){
-            System.out.println("File non trovato");
+            System.out.println("File non trovato.");
         }
-        
-        //FILTRO LE CITTA' PER POPOLAZIONE
-        ArrayList<Comune> comuni = new ArrayList<>();
-        for(Comune c : comuni_unfiltered){
-            if(c.getPop() >= soglia_popolazione)
-                comuni.add(c);
+
+        if(verbose){
+            //FILTRO LE CITTA' PER POPOLAZIONE
+            ArrayList<Comune> comuni = riempiLista(comuni_unfiltered, soglia_popolazione);
+            System.out.println("I comuni in guerra sono " + comuni.size() + ":");
+            for(Comune c : comuni){
+                System.out.println(c.getNome());
+            }
+            System.out.println("\nLa guerra si è conclusa. L'intera regione è adesso unificata sotto il nome di " + combatteteSchiavi(comuni, verbose).getNome() + ".");
+        } else {
+            //ANALIZZO LE PERCENTUALI DI VITTORIA
+            
+            ArrayList<StatComune> statistiche = getStats(comuni_unfiltered, soglia_popolazione, verbose, n_guerre);
+            Collections.sort(statistiche);
+            float somma = 0;
+            for(StatComune sc : statistiche){
+                System.out.println(sc.getNome() + ": " + sc.getWinrate(n_guerre) + "%");
+                somma += sc.getWinrate(n_guerre);
+            }
+            //System.out.println("Somma dei winrate: " + somma);
         }
-        System.out.println("I comuni in guerra sono " + comuni.size() + ":");
-        for(Comune c : comuni){
-            System.out.println(c.getNome());
-        }
-        suspance();
-        Comune vincitore = combatteteSchiavi(comuni);
-        System.out.println("Il vincitore è " + vincitore.getNome() + " con " + vincitore.getTerritori().size() + " territori");
-        
-        //TODO: analizzare la probabilità di vittoria di ciascun comune
-        
         //FINE MAIN
     }
     
-    private static int randomRange(int min, int max) {
-        if (min >= max) {
-            throw new IllegalArgumentException("Il secondo parametro deve essere maggiore del primo");
-	}
-	return (int)(Math.random() * ((max - min) + 1)) + min;
-    }
-    
-    private static Comune combatteteSchiavi(ArrayList<Comune> lista){
-        
+    private static Comune combatteteSchiavi(ArrayList<Comune> lista_comuni, boolean verbose){
+        ArrayList<Comune> lista = new ArrayList<>();
+        for(Comune c: lista_comuni){
+            lista.add(new Comune(c.getNome(), c.getPop(), new Centroide(c.getPos().x, c.getPos().y)));
+        }
         int turno = 1;
         Comune attaccante;
         Territorio vittima;
         int vivi = lista.size();
         int random;
+        boolean esito;
+        Comune propVittima;
         while(true){
             //scelgo un comune casuale come attaccante
-            random = randomRange(0, vivi - 1);
+            random = ThreadLocalRandom.current().nextInt(0, vivi); //dovrei avere "vivi - 1" ma non serve perchè questa funzione non include l'ultimo valore del range
+            //System.out.println("rand tra 0 e " + (vivi - 1) + ": "+ random);
             attaccante = lista.get(random);
             vittima = attaccante.trovaVicino(lista);
-            if(attaccante.conquista(vittima))
+            propVittima = vittima.getProprietario();
+            esito = attaccante.conquista(vittima);
+            
+            if(verbose){
+                System.out.print("Giorno " + turno + ", " + attaccante.getNome() + " ha conquistato il territorio di " + vittima.getNome());
+                if(!propVittima.getNome().equals(vittima.getNome())){
+                    System.out.print(" precedentemente occupato da " + propVittima.getNome());
+                }
+                System.out.print(".\n");
+            }
+            if(esito){
                 vivi--;
-            System.out.println("Turno " + turno + ": " + attaccante.getNome() + " conquista il territorio di " + vittima.getNome() + " e arriva a " + attaccante.getTerritori().size() + " territori");
+                if(verbose)
+                    System.out.println(propVittima.getNome() + " è stata completamente sconfitta.\n" + vivi + " comuni rimanenti.");
+            }
             Collections.sort(lista);
-            //controllo se la partita è finita
             if (vivi == 1){
                 break;
             }
-            
             turno++;
         }
         return attaccante;
     }
     
-    public static void suspance(){
-        System.out.println("Al mio \"INVIO\" scatenate l'inferno...");
+    public static void pause(){
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
     }
     
     public static void currentStatus(ArrayList<Comune> comuni){
-        //fine turno. DEBUG TIME
             for(Comune c : comuni){
                 System.out.println(c.getNome() + ": Territori:");
                 for(Territorio t : c.getTerritori()){
@@ -111,7 +137,44 @@ public class SiciliaGuerraBot2020 {
                 System.out.println();
             }
             System.out.println("\n");
-            //pause();
-            //FINE DEBUG*/
+    }
+    
+    public static ArrayList<Comune> riempiLista(ArrayList<Comune> comuni_unfiltered, int soglia_popolazione){
+        ArrayList<Comune> comuni = new ArrayList<>();
+        for(Comune c : comuni_unfiltered){
+            if(c.getPop() >= soglia_popolazione)
+                comuni.add(new Comune(c.getNome(), c.getPop(), new Centroide(c.getPos().x, c.getPos().y)));
+        }
+        return comuni;
+    }
+    
+    public static ArrayList<StatComune> getStats(ArrayList<Comune> comuni_unfiltered, int soglia_popolazione, boolean verbose, int n_guerre){
+        ArrayList<Comune> comuni_src = riempiLista(comuni_unfiltered, soglia_popolazione);
+        
+        ArrayList<Comune> comuni;
+        
+        ArrayList<StatComune> stat = new ArrayList<>();
+        for(Comune c : comuni_src){
+            stat.add(new StatComune(c.getNome()));
+        }
+        String vinc;
+        
+        //currentStatus(comuni);
+        
+        for(int i = 0; i < n_guerre; i++){
+            comuni = new ArrayList<>();
+            for(Comune c : comuni_src){
+                comuni.add(c);
+            }
+            vinc = combatteteSchiavi(comuni, verbose).getNome();
+            //System.out.println(vinc + " vince la guerra n. " + (i + 1) + " su " + n_guerre);
+            for(StatComune sc : stat){
+                if(sc.getNome().equals(vinc)){
+                    sc.winWar();
+                    break;
+                }
+            }
+        }
+        return stat;
     }
 }
