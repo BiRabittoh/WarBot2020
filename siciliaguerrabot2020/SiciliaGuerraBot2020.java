@@ -112,8 +112,9 @@ public class SiciliaGuerraBot2020 {
             if(esito){
                 vivi--;
                 if(verbose)
-                    System.out.println(propVittima.getNome() + " è stata completamente sconfitta.\n" + vivi + " comuni rimanenti.");
-            }
+                    System.out.println(propVittima.getNome() + " è stata completamente sconfitta.\n" + vivi + " comuni rimanenti.\n");
+            } else
+                System.out.println();
             Collections.sort(lista);
             if (vivi == 1){
                 break;
