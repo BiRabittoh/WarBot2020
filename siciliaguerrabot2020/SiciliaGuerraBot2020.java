@@ -90,7 +90,6 @@ public class SiciliaGuerraBot2020 {
         for(Comune c: lista_comuni){
             lista.add(new Comune(c.getNome(), c.getPop(), new Centroide(c.getPos().x, c.getPos().y)));
         }
-        int turno = 1;
         Comune attaccante;
         Territorio vittima;
         int vivi = lista.size();
@@ -118,12 +117,12 @@ public class SiciliaGuerraBot2020 {
                 if(verbose)
                     System.out.print(propVittima.getNome() + " è stata completamente sconfitta. " + vivi + " comuni rimanenti.\n");
             } else
-                System.out.println("");
+                if(verbose)
+                    System.out.println("");
             Collections.sort(lista);
             if (vivi == 1){
                 break;
             }
-            turno++;
         }
         return attaccante;
     }
