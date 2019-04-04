@@ -5,6 +5,9 @@
  */
 package siciliaguerrabot2020;
 
+import siciliaguerrabot2020.Guerra.Comune;
+import siciliaguerrabot2020.Guerra.Territorio;
+import siciliaguerrabot2020.Guerra.Centroide;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,6 +16,8 @@ import java.util.Collections;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.concurrent.ThreadLocalRandom;
+import siciliaguerrabot2020.Calendario.Calendario;
+import siciliaguerrabot2020.Calendario.Data;
 
 /**
  *
@@ -25,6 +30,8 @@ public class SiciliaGuerraBot2020 {
      */
     
     public static void main(String[] args) {
+        
+        
         final String nomefile = "data.txt";
         final int soglia_popolazione;
         final boolean verbose;
@@ -57,7 +64,7 @@ public class SiciliaGuerraBot2020 {
         } catch (IOException e){
             System.out.println("File non trovato.");
         }
-
+        
         if(verbose){
             //FILTRO LE CITTA' PER POPOLAZIONE
             ArrayList<Comune> comuni = riempiLista(comuni_unfiltered, soglia_popolazione);
@@ -68,20 +75,17 @@ public class SiciliaGuerraBot2020 {
             System.out.println("\nLa guerra si è conclusa. L'intera regione è adesso unificata sotto il regno di " + combatteteSchiavi(comuni, verbose).getNome() + ".");
         } else {
             //ANALIZZO LE PERCENTUALI DI VITTORIA
-            
             ArrayList<StatComune> statistiche = getStats(comuni_unfiltered, soglia_popolazione, verbose, n_guerre);
             Collections.sort(statistiche);
-            float somma = 0;
             for(StatComune sc : statistiche){
                 System.out.println(sc.getNome() + ": " + sc.getWinrate(n_guerre) + "%");
-                somma += sc.getWinrate(n_guerre);
             }
-            //System.out.println("Somma dei winrate: " + somma);
         }
         //FINE MAIN
     }
     
     private static Comune combatteteSchiavi(ArrayList<Comune> lista_comuni, boolean verbose){
+        Calendario calendario = new Calendario(new Data(0, 1, 2020));
         ArrayList<Comune> lista = new ArrayList<>();
         for(Comune c: lista_comuni){
             lista.add(new Comune(c.getNome(), c.getPop(), new Centroide(c.getPos().x, c.getPos().y)));
@@ -103,7 +107,7 @@ public class SiciliaGuerraBot2020 {
             esito = attaccante.conquista(vittima);
             
             if(verbose){
-                System.out.print("Giorno " + turno + ", " + attaccante.getNome() + " ha conquistato il territorio di " + vittima.getNome());
+                System.out.print(calendario.nextString() + ", " + attaccante.getNome() + " ha conquistato il territorio di " + vittima.getNome());
                 if(!propVittima.getNome().equals(vittima.getNome())){
                     System.out.print(" precedentemente occupato da " + propVittima.getNome());
                 }
@@ -112,9 +116,9 @@ public class SiciliaGuerraBot2020 {
             if(esito){
                 vivi--;
                 if(verbose)
-                    System.out.println(propVittima.getNome() + " è stata completamente sconfitta.\n" + vivi + " comuni rimanenti.\n");
+                    System.out.print(propVittima.getNome() + " è stata completamente sconfitta. " + vivi + " comuni rimanenti.\n");
             } else
-                System.out.println();
+                System.out.println("");
             Collections.sort(lista);
             if (vivi == 1){
                 break;
@@ -160,15 +164,12 @@ public class SiciliaGuerraBot2020 {
         }
         String vinc;
         
-        //currentStatus(comuni);
-        
         for(int i = 0; i < n_guerre; i++){
             comuni = new ArrayList<>();
             for(Comune c : comuni_src){
                 comuni.add(c);
             }
             vinc = combatteteSchiavi(comuni, verbose).getNome();
-            //System.out.println(vinc + " vince la guerra n. " + (i + 1) + " su " + n_guerre);
             for(StatComune sc : stat){
                 if(sc.getNome().equals(vinc)){
                     sc.winWar();
