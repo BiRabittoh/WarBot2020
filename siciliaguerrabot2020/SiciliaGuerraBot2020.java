@@ -28,11 +28,11 @@ import siciliaguerrabot2020.Calendario.Data;
  */
 
 public class SiciliaGuerraBot2020 {
-    @Option(names = "-v", description = "verbose output: this only simulates one war (default ${DEFAULT-VALUE})")
+    @Option(names = "-v", description = "only simulate one war (default ${DEFAULT-VALUE})")
     private boolean verbose = false;
     @Option(names = "-s", description = "load data from a specific file (default ${DEFAULT-VALUE})")
     private File source_file = new File("data.txt");
-    @Option(names = "-m", description = "filters for max population (default ${DEFAULT-VALUE})")
+    @Option(names = "-m", description = "filter cities for max population (default ${DEFAULT-VALUE})")
     private int max_population = 12000;
     @Option(names = "-n", description = "sets number of wars to simulate (default ${DEFAULT-VALUE})")
     private int n_wars = 500;
@@ -41,8 +41,7 @@ public class SiciliaGuerraBot2020 {
     
     
     public static void main(String[] args) {
-        /*String[] debug_args = {"-m=50000", "-v"};
-        SiciliaGuerraBot2020 par = CommandLine.populateCommand(new SiciliaGuerraBot2020(), debug_args);*/
+        //String[] debug_args = {"-m=50000", "-h"}; SiciliaGuerraBot2020 par = CommandLine.populateCommand(new SiciliaGuerraBot2020(), debug_args);
         SiciliaGuerraBot2020 par = CommandLine.populateCommand(new SiciliaGuerraBot2020(), args);
         
         if(par.helpRequested){
