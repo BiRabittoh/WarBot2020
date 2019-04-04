@@ -9,6 +9,7 @@ import siciliaguerrabot2020.Guerra.Comune;
 import siciliaguerrabot2020.Guerra.Territorio;
 import siciliaguerrabot2020.Guerra.Centroide;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +17,8 @@ import java.util.Collections;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.concurrent.ThreadLocalRandom;
+import picocli.CommandLine;
+import picocli.CommandLine.Option;
 import siciliaguerrabot2020.Calendario.Calendario;
 import siciliaguerrabot2020.Calendario.Data;
 
@@ -23,38 +26,41 @@ import siciliaguerrabot2020.Calendario.Data;
  *
  * @author Bi-Rabittoh
  */
-public class SiciliaGuerraBot2020 {
 
-    /**
-     * @param args the command line arguments
-     */
+public class SiciliaGuerraBot2020 {
+    @Option(names = "-v", description = "verbose output: this only simulates one war (default ${DEFAULT-VALUE})")
+    private boolean verbose = false;
+    @Option(names = "-s", description = "load data from a specific file (default ${DEFAULT-VALUE})")
+    private File source_file = new File("data.txt");
+    @Option(names = "-m", description = "filters for max population (default ${DEFAULT-VALUE})")
+    private int max_population = 12000;
+    @Option(names = "-n", description = "sets number of wars to simulate (default ${DEFAULT-VALUE})")
+    private int n_wars = 500;
+    @Option(names = { "-h", "--help" }, usageHelp = true, description = "display a help message")
+    private boolean helpRequested;
+    
     
     public static void main(String[] args) {
+        /*String[] debug_args = {"-m=50000", "-v"};
+        SiciliaGuerraBot2020 par = CommandLine.populateCommand(new SiciliaGuerraBot2020(), debug_args);*/
+        SiciliaGuerraBot2020 par = CommandLine.populateCommand(new SiciliaGuerraBot2020(), args);
         
-        
-        final String nomefile = "data.txt";
-        final int soglia_popolazione;
-        final boolean verbose;
-        final int n_guerre;
-        
-        //controllo se ci sono 3 argomenti
-        if(args.length == 3){
-            soglia_popolazione = Integer.parseInt(args[0]);
-            verbose = Boolean.parseBoolean(args[1]);
-            n_guerre = Integer.parseInt(args[2]);;
-        } else {
-            soglia_popolazione = 12000;
-            verbose = true;
-            n_guerre = 500;
-            System.out.println("Parametri errati o assenti. Carico i valori di default.");
+        if(par.helpRequested){
+            CommandLine.usage(par, System.out);
+            System.exit(0);
         }
+        
+        final File file = par.source_file;
+        final int soglia_popolazione = par.max_population;
+        final boolean verbose = par.verbose;
+        final int n_guerre = par.n_wars;
         
         //LEGGO I DATI DA FILE
         ArrayList<Comune> comuni_unfiltered = new ArrayList<>();
         BufferedReader reader;
         StringTokenizer st;
         try {
-            reader = new BufferedReader(new FileReader(nomefile));
+            reader = new BufferedReader(new FileReader(file));
             String line = reader.readLine();
             while (line != null){
                 st = new StringTokenizer(line);
@@ -63,6 +69,7 @@ public class SiciliaGuerraBot2020 {
             }
         } catch (IOException e){
             System.out.println("File non trovato.");
+            System.exit(1);
         }
         
         if(verbose){
@@ -82,6 +89,7 @@ public class SiciliaGuerraBot2020 {
             }
         }
         //FINE MAIN
+        System.exit(0);
     }
     
     private static Comune combatteteSchiavi(ArrayList<Comune> lista_comuni, boolean verbose){
@@ -106,7 +114,7 @@ public class SiciliaGuerraBot2020 {
             esito = attaccante.conquista(vittima);
             
             if(verbose){
-                System.out.print(calendario.nextString() + ", " + attaccante.getNome() + " ha conquistato il territorio di " + vittima.getNome());
+                System.out.print("\n" + calendario.nextString() + ", " + attaccante.getNome() + " ha conquistato il territorio di " + vittima.getNome());
                 if(!propVittima.getNome().equals(vittima.getNome())){
                     System.out.print(" precedentemente occupato da " + propVittima.getNome());
                 }
@@ -116,13 +124,10 @@ public class SiciliaGuerraBot2020 {
                 vivi--;
                 if(verbose)
                     System.out.print(propVittima.getNome() + " è stata completamente sconfitta. " + vivi + " comuni rimanenti.\n");
-            } else
-                if(verbose)
-                    System.out.println("");
-            Collections.sort(lista);
-            if (vivi == 1){
-                break;
             }
+            Collections.sort(lista);
+            if (vivi == 1)
+                break;
         }
         return attaccante;
     }
