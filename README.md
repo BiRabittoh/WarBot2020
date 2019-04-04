@@ -10,3 +10,15 @@ executable.jar soglia_popolazione verbose n_guerre
 - n_guerre is the number of wars to simulate (default 500)
 
 The program will load the default values if you don't always put all three parameters.
+
+# Data collection
+The program reads coordinates and populations from data.txt in this format:
+```
+country-name(String with no spaces) population(int) latitude(double) longitude(double)
+```
+For example:
+```
+Barcellona-Pozzo-di-Gotto 41293 38.1487398 15.2113962
+```
+
+I will soon be working on a version without a population filter.
