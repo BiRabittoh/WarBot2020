@@ -15,12 +15,11 @@ import java.util.LinkedList;
 public class Comune implements Comparable<Comune> {
     private boolean vivo;
     private String nome;
-    private Centroide pos;
+    private Posizione pos;
     private LinkedList<Territorio> territori;
     private final int pop;
-    private double winrate;
 
-    public Comune(String nome, int pop, Centroide pos) {
+    public Comune(String nome, int pop, Posizione pos) {
         this.nome = nome;
         this.pop = pop;
         this.pos = pos;
@@ -45,11 +44,10 @@ public class Comune implements Comparable<Comune> {
         return pop;
     }
 
-    public Centroide getPos() {
+    public Posizione getPos() {
         return pos;
     }
 
-    
     public LinkedList<Territorio> getTerritori() {
         return territori;
     }
@@ -60,24 +58,13 @@ public class Comune implements Comparable<Comune> {
         return "Comune{" + "vivo=" + vivo + ", nome=" + nome + ", pop=" + pop + ", pos=" + pos + '}';
     }
     
-    //FUNZIONI GEOMETRICHE
-    
+    //FUNZIONI BELLE
     public void aggiornaCentroide(){
-        Territorio territorio;
-        Centroide temp = territori.get(0).getPos();
-        for(int i = 0; i < territori.size(); i++){
-            territorio = territori.get(i);
-            
-        }
-        
-        
         for (Territorio t : territori){
-            temp = temp.puntoMedio(t.getPos());
+            pos = pos.puntoMedio(t.getPos());
         }
-        pos = temp;
     }
     
-    //FUNZIONI BELLE
     public boolean conquista(Territorio target){
         boolean ris = false;
         target.getProprietario().territori.remove(target);

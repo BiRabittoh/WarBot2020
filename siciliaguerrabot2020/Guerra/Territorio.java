@@ -12,9 +12,9 @@ package siciliaguerrabot2020.Guerra;
 public class Territorio {
     private final String nome;
     private Comune proprietario;
-    private final Centroide pos;
+    private final Posizione pos;
 
-    public Territorio(String nome, Comune proprietario, Centroide pos) {
+    public Territorio(String nome, Comune proprietario, Posizione pos) {
         this.nome = nome;
         this.proprietario = proprietario;
         this.pos = pos;
@@ -28,7 +28,7 @@ public class Territorio {
         this.proprietario = proprietario;
     }
 
-    public Centroide getPos() {
+    public Posizione getPos() {
         return pos;
     }
 
