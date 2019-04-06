@@ -5,9 +5,10 @@
  */
 package siciliaguerrabot2020;
 
+import siciliaguerrabot2020.Guerra.StatComune;
 import siciliaguerrabot2020.Guerra.Comune;
 import siciliaguerrabot2020.Guerra.Territorio;
-import siciliaguerrabot2020.Guerra.Centroide;
+import siciliaguerrabot2020.Guerra.Posizione;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -41,7 +42,7 @@ public class SiciliaGuerraBot2020 {
     
     
     public static void main(String[] args) {
-        //String[] debug_args = {"-m=50000", "-h"}; SiciliaGuerraBot2020 par = CommandLine.populateCommand(new SiciliaGuerraBot2020(), debug_args);
+        //String[] debug_args = {"-m=50000", "-v"}; SiciliaGuerraBot2020 par = CommandLine.populateCommand(new SiciliaGuerraBot2020(), debug_args);
         SiciliaGuerraBot2020 par = CommandLine.populateCommand(new SiciliaGuerraBot2020(), args);
         
         if(par.helpRequested){
@@ -63,7 +64,7 @@ public class SiciliaGuerraBot2020 {
             String line = reader.readLine();
             while (line != null){
                 st = new StringTokenizer(line);
-                comuni_unfiltered.add(new Comune(st.nextToken(), Integer.parseInt(st.nextToken()), new Centroide(Double.parseDouble(st.nextToken()), Double.parseDouble(st.nextToken()))));
+                comuni_unfiltered.add(new Comune(st.nextToken(), Integer.parseInt(st.nextToken()), new Posizione(Double.parseDouble(st.nextToken()), Double.parseDouble(st.nextToken()))));
                 line = reader.readLine();
             }
         } catch (IOException e){
@@ -95,7 +96,7 @@ public class SiciliaGuerraBot2020 {
         Calendario calendario = new Calendario(new Data(0, 1, 2020));
         ArrayList<Comune> lista = new ArrayList<>();
         for(Comune c: lista_comuni){
-            lista.add(new Comune(c.getNome(), c.getPop(), new Centroide(c.getPos().x, c.getPos().y)));
+            lista.add(new Comune(c.getNome(), c.getPop(), new Posizione(c.getPos().x, c.getPos().y)));
         }
         Comune attaccante;
         Territorio vittima;
@@ -151,7 +152,7 @@ public class SiciliaGuerraBot2020 {
         ArrayList<Comune> comuni = new ArrayList<>();
         for(Comune c : comuni_unfiltered){
             if(c.getPop() >= soglia_popolazione)
-                comuni.add(new Comune(c.getNome(), c.getPop(), new Centroide(c.getPos().x, c.getPos().y)));
+                comuni.add(new Comune(c.getNome(), c.getPop(), new Posizione(c.getPos().x, c.getPos().y)));
         }
         return comuni;
     }
